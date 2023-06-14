@@ -25,6 +25,15 @@ def load_dictionary():
             curr_node = dictionary
             word = line.strip().lower()
 
+            if not word.isalpha():
+                continue
+
+            if len(word) < 3:
+                continue
+
+            if len(word) > BOARD_SIZE**2:
+                continue
+
             # break our word into letters
             for i in range(len(word)):
                 curr_char = word[i]
