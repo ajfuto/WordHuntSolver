@@ -8,7 +8,8 @@ BOARD_SIZE = 4
 MIN_LENGTH = 3
 MAX_LENGTH = BOARD_SIZE**2
 
-moves = [ [-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1] ]
+MOVES = [ [-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1] ]
+ARROWS = [ '↖', '↑', '↗', '←', '→', '↙', '↓', '↘' ]
 
 # Trie implementation to store dictionary of words
 class TrieNode():
@@ -76,19 +77,20 @@ def get_letters():
 def solve(dictionary, board):
 
     visited = [[False for i in range(BOARD_SIZE)] for j in range(BOARD_SIZE)]
-    found_words = []
+    found_words = {}
+    used_moves = []
 
     for i in range(BOARD_SIZE):
         for j in range(BOARD_SIZE):
-            recurse_solve(i, j, '', visited, dictionary, board, found_words)
+            recurse_solve(i, j, '', visited, dictionary, board, found_words, [f"({i}, {j}):"])
 
-    return list(set(found_words))
+    return found_words
 
 def is_safe(x, y, max_x, max_y):
     return x >= 0 and x < max_x and y >= 0 and y < max_y
 
 # recursive function that finds solutions given a board state
-def recurse_solve(row, col, word, visited, curr, board, found):
+def recurse_solve(row, col, word, visited, curr, board, found, path):
 
     # base cases, out of bounds or visited
     if not is_safe(row, col, BOARD_SIZE, BOARD_SIZE):
@@ -105,26 +107,28 @@ def recurse_solve(row, col, word, visited, curr, board, found):
     word += curr_let
 
     if len(word) > MIN_LENGTH and curr.children[curr_let].is_word:
-        found.append(word)
+        found[word] = path
 
-    for move in moves:
+    for i,move in enumerate(MOVES):
         x = move[0]
         y = move[1]
         if is_safe(row+x, col+y, BOARD_SIZE, BOARD_SIZE):
             if not visited[row+x][col+y]:
-                recurse_solve(row+x, col+y, word, visited, curr.children[curr_let], board, found)
+                recurse_solve(row+x, col+y, word, visited, curr.children[curr_let], board, found, path + [ARROWS[i]])
 
     visited[row][col] = False
 
 # sorts the solutions by descending lengths
 def sort_sols(sols):
-    return sorted(sols, key=len)[::-1]
+    return sorted(sols.items(), key=lambda x: len(x[0]), reverse=False)
 
 def main(): 
     words = load_dictionary()
     letters = get_letters()
     found_sols = solve(words, letters)
-    print(sort_sols(found_sols))
+
+    for sol,path in sort_sols(found_sols):
+        print(f'{sol} | {" ".join(path)}')
 
 if __name__ == '__main__':
     main()
