@@ -5,6 +5,8 @@ import time
 import sys
 
 BOARD_SIZE = 4
+MIN_LENGTH = 3
+MAX_LENGTH = BOARD_SIZE**2
 
 moves = [ [-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1] ]
 
@@ -28,10 +30,10 @@ def load_dictionary():
             if not word.isalpha():
                 continue
 
-            if len(word) < 3:
+            if len(word) < MIN_LENGTH:
                 continue
 
-            if len(word) > BOARD_SIZE**2:
+            if len(word) > MAX_LENGTH:
                 continue
 
             # break our word into letters
@@ -55,8 +57,12 @@ def load_dictionary():
 def get_letters():
     ret_lets = []
 
-    letters_str = sys.argv[1][0:16] if len(sys.argv) > 1 and len(sys.argv[1]) >= 16 else input('please enter the available letters: ')
+    letters_str = sys.argv[1][0:MAX_LENGTH] if len(sys.argv) > 1 and len(sys.argv[1]) >= MAX_LENGTH else input('please enter the available letters: ')
     letters_str.replace(' ', '').lower().strip()
+    
+    if len(letters_str) != MAX_LENGTH:
+        print('invalid number of letters')
+        exit(1)
 
     for i in range(BOARD_SIZE):
         ret_lets.append([])
@@ -98,7 +104,7 @@ def recurse_solve(row, col, word, visited, curr, board, found):
     visited[row][col] = True
     word += curr_let
 
-    if len(word) > 3 and curr.children[curr_let].is_word:
+    if len(word) > MIN_LENGTH and curr.children[curr_let].is_word:
         found.append(word)
 
     for move in moves:
